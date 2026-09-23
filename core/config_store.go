@@ -86,13 +86,13 @@ func configDBPath() string {
 	return ConfigDBFile
 }
 
-// ConfigDBPath returns the canonical SQLite file used by the app.
+// ConfigDBPath retorna o arquivo SQLite canônico usado pelo aplicativo.
 func ConfigDBPath() string {
 	return configDBPath()
 }
 
-// CloseConfigDB closes the shared settings database connection. Tests and
-// graceful shutdown use this to release the SQLite file handle.
+// CloseConfigDB fecha a conexão do banco de dados de configurações compartilhadas. Testes e
+// encerramentos graciosos (graceful shutdown) usam isso para liberar o handle do arquivo SQLite.
 func CloseConfigDB() error {
 	if configDB == nil {
 		return nil
