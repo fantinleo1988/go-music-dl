@@ -9,9 +9,9 @@ import (
 func TestWebBasePathFlagDefault(t *testing.T) {
 	flag := webCmd.Flags().Lookup("base-path")
 	if flag == nil {
-		t.Fatal("web command is missing --base-path")
+		t.Fatal("o comando web está sem o --base-path")
 	}
 	if got, want := flag.DefValue, web.DefaultRoutePrefix; got != want {
-		t.Fatalf("--base-path default = %q, want %q", got, want)
+		t.Fatalf("padrão do --base-path = %q, esperado %q", got, want)
 	}
 }
