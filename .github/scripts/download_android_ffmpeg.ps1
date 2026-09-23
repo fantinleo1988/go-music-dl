@@ -29,7 +29,7 @@ function Get-LatestNdkRoot {
     }
 
     if ([string]::IsNullOrWhiteSpace($SdkHome)) {
-        throw "ANDROID_HOME is empty and ANDROID_NDK_ROOT was not provided"
+        throw "ANDROID_HOME está vazio e ANDROID_NDK_ROOT não foi fornecido"
     }
 
     $ndkBundle = Join-Path $SdkHome "ndk-bundle"
@@ -43,7 +43,7 @@ function Get-LatestNdkRoot {
         Select-Object -First 1
 
     if ($null -eq $ndk) {
-        throw "No Android NDK found under $ndkRoot"
+        throw "Nenhum Android NDK encontrado em $ndkRoot"
     }
     return $ndk.FullName
 }
@@ -54,7 +54,7 @@ $ndkHost = Get-ChildItem -LiteralPath $ndkLibRoot -Directory |
     Where-Object { Test-Path (Join-Path $_.FullName "sysroot\usr\lib") } |
     Select-Object -First 1
 if ($null -eq $ndkHost) {
-    throw "No LLVM prebuilt sysroot found under $ndkLibRoot"
+    throw "Nenhum sysroot pré-compilado LLVM encontrado em $ndkLibRoot"
 }
 
 $workRoot = Join-Path ([IO.Path]::GetTempPath()) ("music-dl-android-ffmpeg-" + [Guid]::NewGuid().ToString("N"))
@@ -67,10 +67,10 @@ try {
         $abiRoot = Join-Path $outputRootFull $item.Abi
         $url = "$BaseUrl/$($item.Zip)/download"
 
-        Write-Host "Downloading $($item.Zip)"
+        Write-Host "Baixando $($item.Zip)"
         & curl.exe -L --fail --retry 5 --retry-delay 5 -o $zipPath $url
         if ($LASTEXITCODE -ne 0) {
-            throw "curl failed for $url"
+            throw "curl falhou para $url"
         }
 
         Expand-Archive -Path $zipPath -DestinationPath $extractRoot -Force
@@ -79,7 +79,7 @@ try {
         foreach ($tool in @("ffmpeg", "ffprobe")) {
             $source = Join-Path $extractRoot $tool
             if (-not (Test-Path $source)) {
-                throw "$($item.Zip) does not contain $tool"
+                throw "$($item.Zip) não contém $tool"
             }
 
             $target = Join-Path $abiRoot $tool
@@ -87,13 +87,13 @@ try {
 
             $length = (Get-Item -LiteralPath $target).Length
             if ($length -lt 1048576) {
-                throw "$target is unexpectedly small ($length bytes)"
+                throw "$target é inesperadamente pequeno ($length bytes)"
             }
         }
 
         $libcxxSource = Join-Path $ndkHost.FullName (Join-Path "sysroot\usr\lib\$($item.Triple)" "libc++_shared.so")
         if (-not (Test-Path $libcxxSource)) {
-            throw "libc++_shared.so not found for $($item.Abi) at $libcxxSource"
+            throw "libc++_shared.so não encontrado para $($item.Abi) em $libcxxSource"
         }
         $libcxxTarget = Join-Path $abiRoot "libc++_shared.so"
         Copy-Item -LiteralPath $libcxxSource -Destination $libcxxTarget -Force
@@ -103,4 +103,4 @@ finally {
     Remove-Item -LiteralPath $workRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-Write-Host "Android ffmpeg binaries prepared at $outputRootFull"
+Write-Host "Binários do ffmpeg para Android preparados em $outputRootFull"
