@@ -30,7 +30,7 @@ func main() {
 
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
-		log.Fatalf("can not listen: %v", err)
+		log.Fatalf("não foi possível escutar: %v", err)
 	}
 
 	port := listener.Addr().(*net.TCPAddr).Port
@@ -47,13 +47,13 @@ func main() {
 	}
 
 	if err := server.Serve(listener); err != nil {
-		log.Fatalf("server error: %v", err)
+		log.Fatalf("erro no servidor: %v", err)
 	}
 }
 
 func handleSearch(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		http.Error(w, "método não permitido", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -61,11 +61,11 @@ func handleSearch(w http.ResponseWriter, r *http.Request) {
 	sourcesParam := strings.TrimSpace(r.URL.Query().Get("sources"))
 
 	if keyword == "" {
-		http.Error(w, "missing keyword", http.StatusBadRequest)
+		http.Error(w, "palavra-chave ausente", http.StatusBadRequest)
 		return
 	}
 	if sourcesParam == "" {
-		http.Error(w, "missing sources", http.StatusBadRequest)
+		http.Error(w, "fontes ausentes", http.StatusBadRequest)
 		return
 	}
 
