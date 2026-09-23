@@ -12,7 +12,7 @@ var basePath string
 
 var webCmd = &cobra.Command{
 	Use:   "web",
-	Short: "启动 Web 服务模式",
+	Short: "Iniciar modo de serviço Web",
 	Run: func(cmd *cobra.Command, args []string) {
 		if desktopMode {
 			web.StartDesktop(port)
@@ -23,10 +23,10 @@ var webCmd = &cobra.Command{
 }
 
 func init() {
-	webCmd.Flags().StringVarP(&port, "port", "p", "8080", "服务端口")
-	webCmd.Flags().StringVar(&basePath, "base-path", web.DefaultRoutePrefix, "Web 端基础路径")
-	webCmd.Flags().BoolVar(&noBrowser, "no-browser", false, "不自动打开浏览器")
-	webCmd.Flags().BoolVar(&desktopMode, "desktop", false, "桌面内嵌模式")
+	webCmd.Flags().StringVarP(&port, "port", "p", "8080", "Porta do serviço")
+	webCmd.Flags().StringVar(&basePath, "base-path", web.DefaultRoutePrefix, "Caminho base da interface Web")
+	webCmd.Flags().BoolVar(&noBrowser, "no-browser", false, "Não abrir o navegador automaticamente")
+	webCmd.Flags().BoolVar(&desktopMode, "desktop", false, "Modo desktop embutido")
 	_ = webCmd.Flags().MarkHidden("desktop")
 	rootCmd.AddCommand(webCmd)
 }
