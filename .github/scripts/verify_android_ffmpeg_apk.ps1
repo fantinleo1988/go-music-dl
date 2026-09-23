@@ -13,7 +13,7 @@ Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 if (-not (Test-Path $ApkPath)) {
-    throw "APK not found: $ApkPath"
+    throw "APK não encontrado: $ApkPath"
 }
 
 $apkFull = [IO.Path]::GetFullPath($ApkPath)
@@ -25,26 +25,26 @@ foreach ($abi in $expandedAbis) {
         foreach ($tool in @("ffmpeg", "ffprobe")) {
             $assetEntryName = "assets/ffmpeg/$abi/$tool"
             if ($null -ne $zip.GetEntry($assetEntryName)) {
-                throw "$apkFull must not contain $assetEntryName; bundled executables belong under lib/$abi as native libraries so Android 10+ can execute them"
+                throw "$apkFull não deve conter $assetEntryName; executáveis empacotados devem ficar em lib/$abi como bibliotecas nativas para que o Android 10+ possa executá-los"
             }
 
             $entryName = "lib/$abi/lib$tool.so"
             $entry = $zip.GetEntry($entryName)
             if ($null -eq $entry) {
-                throw "$apkFull is missing $entryName"
+                throw "Faltando $entryName em $apkFull"
             }
             if ($entry.Length -lt 1048576) {
-                throw "$entryName in $apkFull is unexpectedly small ($($entry.Length) bytes)"
+                throw "$entryName em $apkFull é inesperadamente pequeno ($($entry.Length) bytes)"
             }
         }
 
         $libcxxEntryName = "lib/$abi/libc++_shared.so"
         $libcxxEntry = $zip.GetEntry($libcxxEntryName)
         if ($null -eq $libcxxEntry) {
-            throw "$apkFull is missing $libcxxEntryName"
+            throw "Faltando $libcxxEntryName em $apkFull"
         }
         if ($libcxxEntry.Length -lt 1048576) {
-            throw "$libcxxEntryName in $apkFull is unexpectedly small ($($libcxxEntry.Length) bytes)"
+            throw "$libcxxEntryName em $apkFull é inesperadamente pequeno ($($libcxxEntry.Length) bytes)"
         }
     }
 }
@@ -57,12 +57,12 @@ $buildTools = Get-ChildItem -LiteralPath $buildToolsRoot -Directory |
     Sort-Object -Property @{ Expression = { try { [version]$_.Name } catch { [version]"0.0.0" } }; Descending = $true } |
     Select-Object -First 1
 if ($null -eq $buildTools) {
-    throw "No Android build-tools found under $buildToolsRoot"
+    throw "Nenhum build-tools do Android encontrado em $buildToolsRoot"
 }
 $apkSigner = Join-Path $buildTools.FullName "apksigner.bat"
 & $apkSigner verify --verbose $apkFull
 if ($LASTEXITCODE -ne 0) {
-    throw "apksigner verify failed for $apkFull"
+    throw "apksigner verify falhou para $apkFull"
 }
 
-Write-Host "Verified bundled libffmpeg.so, libffprobe.so, and libc++_shared.so under lib/<abi> in $apkFull"
+Write-Host "Verificados libffmpeg.so, libffprobe.so e libc++_shared.so empacotados em lib/<abi> no $apkFull"
