@@ -1,4 +1,4 @@
-name: 推送代码检查
+name: Verificação de push de código
 on:
   push:
     branches:
@@ -8,41 +8,41 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
+      - name: Configurar Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.25'
 
-      - name: Check out code into the Go module directory
+      - name: Fazer checkout do código no diretório do módulo Go
         uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
           submodules: 'recursive'
 
-      - name: Tidy Modules
+      - name: Organizar módulos
         run: |
           go mod tidy
           go generate ./...
 
-      - name: Run Lint
+      - name: Executar Lint
         uses: golangci/golangci-lint-action@v7
         with:
           version: v2.12.2
           args: --new-from-rev=HEAD~1 ./cmd/music-dl ./core ./internal/... ./winres/...
 
-      - name: Commit back
+      - name: Fazer commit das alterações
         if: ${{ !github.head_ref }}
         continue-on-error: true
         run: |
           git config --local user.name 'github-actions[bot]'
           git config --local user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add --all
-          git commit -m "chore(lint): 改进代码样式"
+          git commit -m "chore(lint): Melhorar estilo de código"
 
-      - name: Create Pull Request
+      - name: Criar Pull Request
         if: ${{ !github.head_ref }}
         continue-on-error: true
         uses: peter-evans/create-pull-request@v8
         with:
-          title: "chore(lint): 改进代码样式"
+          title: "chore(lint): Melhorar estilo de código"
