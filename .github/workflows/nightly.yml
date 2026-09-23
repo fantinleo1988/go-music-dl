@@ -1,20 +1,20 @@
-name: 每日构建
+name: Build diário
 
 on: [push, pull_request]
 
 env:
   BINARY_PREFIX: "music-dl_"
   BINARY_SUFFIX: ""
-  PR_PROMPT: "::warning:: Build artifact will not be uploaded due to the workflow is trigged by pull request."
+  PR_PROMPT: "::warning:: O upload do artefato de build não será feito porque o workflow foi acionado por um pull request."
   LD_FLAGS: "-w -s"
 
 jobs:
   build:
-    name: Build binary CI
+    name: CI de build do binário
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # build and publish in parallel: linux/386, linux/amd64, windows/386, windows/amd64, darwin/amd64, darwin/arm64
+        # build e publicação em paralelo: linux/386, linux/amd64, windows/386, windows/amd64, darwin/amd64, darwin/arm64
         goos: [linux, windows]
         goarch: ["386", amd64, arm, arm64]
         exclude:
@@ -29,11 +29,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup Go environment
+      - name: Configurar ambiente Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.25'
-      - name: Cache downloaded module
+      - name: Fazer cache do módulo baixado
         uses: actions/cache@v4
         continue-on-error: true
         with:
@@ -41,35 +41,36 @@ jobs:
             ~/.cache/go-build
             ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ matrix.goos }}-${{ matrix.goarch }}-${{ hashFiles('**/go.sum') }}
-      - name: Build binary file
+      - name: Fazer o build do arquivo binário
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           IS_PR: ${{ !!github.head_ref }}
         run: |
-          # 确保在项目根目录
+          # Garante que está no diretório raiz do projeto
           pwd
           ls -la
-          # 检查 cmd/music-dl 目录是否存在
+          # Verifica se o diretório cmd/music-dl existe
           if [ ! -d "./cmd/music-dl" ]; then
-            echo "::error:: 缺少 cmd/music-dl 目录，请检查代码提交"
-            echo "当前目录内容:"
+            echo "::error:: Faltando diretório cmd/music-dl, por favor verifique o commit do código"
+            echo "Conteúdo do diretório atual:"
             find . -type f -name "*.go" | head -20
             exit 1
           fi
-          # 初始化 Go 模块并下载依赖
+          # Inicializa o módulo Go e baixa as dependências
           go mod tidy
           go mod download
-          # 生成 Windows 资源文件
+          # Gera os arquivos de recurso do Windows
           GOOS= GOARCH= go generate ./...
           if [ $GOOS = "windows" ]; then export BINARY_SUFFIX="$BINARY_SUFFIX.exe"; fi
           if $IS_PR ; then echo $PR_PROMPT; fi
           export BINARY_NAME="$BINARY_PREFIX$GOOS_$GOARCH$BINARY_SUFFIX"
           export CGO_ENABLED=0
           go build -o "output/$BINARY_NAME" -trimpath -ldflags "$LD_FLAGS" ./cmd/music-dl
-      - name: Upload artifact
+      - name: Fazer upload do artefato
         uses: actions/upload-artifact@v4
         if: ${{ !github.head_ref }}
         with:
           name: ${{ matrix.goos }}_${{ matrix.goarch }}
           path: output/
+
