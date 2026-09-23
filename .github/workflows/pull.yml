@@ -1,40 +1,40 @@
-name: 拉取请求检查
+name: Verificação de Pull Request
 on:
   pull_request_target:
     types: [assigned, opened, synchronize, reopened]
 jobs:
-  # This workflow closes invalid PR
+  # Este workflow fecha PRs inválidos
   close-pr:
     name: closepr
-    # The type of runner that the job will run on
+    # O tipo de runner no qual o job será executado
     runs-on: ubuntu-latest
     permissions: write-all
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    # Os passos representam uma sequência de tarefas que serão executadas como parte do job
     steps:
-      - name: Close PR if commit message contains ".go"
+      - name: Fechar PR se a mensagem de commit contiver ".go"
         if: contains(github.event.pull_request.title, '.go')
         uses: superbrothers/close-pull-request@v3
         with:
-          # Optional. Post a issue comment just before closing a pull request.
-          comment: "非法PR. 请`fork`后修改自己的仓库, 而不是向主仓库提交更改. 如果您确信您的PR是为了给主仓库新增功能或修复bug, 请更改默认PR标题. **注意**: 如果您再次触发本提示, 则有可能导致账号被封禁."
+          # Opcional. Postar um comentário na issue logo antes de fechar um pull request.
+          comment: "PR inválido. Por favor, faça um `fork` e altere o seu próprio repositório, em vez de enviar alterações para o repositório principal. Se você tem certeza de que o seu PR tem como objetivo adicionar novas funcionalidades ou corrigir bugs no repositório principal, por favor altere o título padrão do PR. **Atenção**: Se você acionar este aviso novamente, isso poderá resultar no banimento da sua conta."
 
   golangci:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
+      - name: Configurar Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.25'
 
-      - name: Check out code into the Go module directory
+      - name: Fazer checkout do código no diretório do módulo Go
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Tidy Modules
+      - name: Organizar módulos
         run: |
           go mod tidy
           go generate ./...
@@ -42,22 +42,22 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
+          # Opcional: versão do golangci-lint a ser usada no formato v1.2 ou v1.2.3 ou `latest` para usar a versão mais recente
           version: v2.12.2
           args: ./cmd/music-dl ./core ./internal/... ./winres/...
           only-new-issues: true
 
-          # Optional: working directory, useful for monorepos
+          # Opcional: diretório de trabalho, útil para monorepos
           # working-directory: somedir
 
-          # Optional: golangci-lint command line arguments.
+          # Opcional: argumentos de linha de comando do golangci-lint.
           # args: --issues-exit-code=0
 
-          # Optional: show only new issues if it's a pull request. The default value is `false`.
+          # Opcional: mostrar apenas novos problemas se for um pull request. O valor padrão é `false`.
           # only-new-issues: true
 
-          # Optional: if set to true then the action don't cache or restore ~/go/pkg.
+          # Opcional: se definido como true, a action não fará cache ou restaurará ~/go/pkg.
           # skip-pkg-cache: true
 
-          # Optional: if set to true then the action don't cache or restore ~/.cache/go-build.
+          # Opcional: se definido como true, a action não fará cache ou restaurará ~/.cache/go-build.
           # skip-build-cache: true
